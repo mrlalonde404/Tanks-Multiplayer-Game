@@ -49,31 +49,74 @@ export default class Terrain {
         return tp;
     }
 
-    update(shells) {
+    shellPointCollision(shell, point) {
+        // check if the distance between the point and the shell is less than the length of the radius of the shell, this meaning that the line end point is in the shell
+        if (Math.sqrt(Math.pow(point.x - shell.position.x, 2) + Math.pow(point.y - shell.position.y, 2)) < shell.size) {
+            return true;
+        }
+        return false;
+    }
 
+    shellLineCollision(shell, p1, p2) {
+        // see if either of the end points are in the shell
+        if (this.shellPointCollision(shell, p1) || this.shellPointCollision(shell, p2)) {
+            return true;
+        }
+
+        // see if the shell is in the line segment
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const segLen = Math.sqrt(dx*dx + dy*dy);
+
+        // get the dot product for the line segment and the shell
+        let dot = ((shell.position.x - p1.x)*dx + (shell.position.y - p1.y)*dy) / Math.pow(segLen, 2);
+
+        // get the closest point by using the dot product
+        const closestX = p1.x + (dot * dx);
+        const closestY = p1.y + (dot * dy);
+
+        // check if th closest point is on the line segment, if not, no collision; buffer is needed because of float comparison
+        const buffer = 0.1;
+        const d1 = Math.sqrt(Math.pow(closestX - p1.x, 2) + Math.pow(closestY - p1.y, 2));
+        const d2 = Math.sqrt(Math.pow(closestX - p2.x, 2) + Math.pow(closestY - p2.y, 2));
+
+        // see if the closest point is on the line segment
+        if (d1+d2 >= segLen-buffer && d1+d2 <= segLen+buffer) {
+            // if it is here, then it isn't an end point and is on the line segment
+            const distX = closestX - shell.position.x;
+            const distY = closestY - shell.position.y;
+            const distance = Math.sqrt(distX*distX + distY*distY);
+
+            // if the distance between the center of the shell and the line segment is less than the size of the shell, there was a collision
+            if (distance <= shell.size) {
+                return true;
+            }
+        }
+
+        // there was no collision
+        return false;
+    }
+
+
+    update(shells) {
         // loop through the shells and see if there is a collision
         for (let j = 0; j < shells.length; j++) {
-            let s = shells[j];
-
             // only loop from first to second to last, at the last point you cant check for the one past it, so stop
-            for (let i = 0; i < this.terrainPoints.length - 1; i++) {
+            for (let i = 0; i < this.terrainPoints.length; i++) {
+                if (i === this.terrainPoints.length-1) {
+                    break;
+                }
                 // get the current and next point to check if the shell is under the line made between them
                 let p1 = this.terrainPoints[i];
                 let p2 = this.terrainPoints[i+1];
-                
-                // get the difference in between the x's and y's for the segment between p1 and p2
-                const dx = p2.x - p1.x;
-                const dy = p2.y - p1.y;
-                const slope = dy/dx;
 
-                if (s.position.y - ((slope * s.position.x) + p1.y) > 0 && (s.position.x >= p1.x && s.position.x <= p2.x)) {
+                // if there is a collision between the shell in between the 2 lines, remove the shell and make the crater
+                if (this.shellLineCollision(shells[j], p1, p2)) {
                     // make the crater at the point where the collision happened by adding more terrain points 
                     console.log("----------------------------------------------------------")
                     console.log("crater");
-                    console.log(s.position);
+                    console.log(shells[j].position);
                     console.log(p1, p2);
-                    console.log(dx, dy, slope);
-                    console.log(s.position.y - ((slope * s.position.x) + p1.y));
 
                     // get rid of the shell
                     shells.splice(j, 1);
