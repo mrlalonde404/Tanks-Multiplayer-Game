@@ -98,7 +98,7 @@ export default class Terrain {
     }
 
 
-    update(shells) {
+    update(shells, ctx) {
         // loop through the shells and see if there is a collision
         for (let j = 0; j < shells.length; j++) {
             // only loop from first to second to last, at the last point you cant check for the one past it, so stop
@@ -112,11 +112,26 @@ export default class Terrain {
 
                 // if there is a collision between the shell in between the 2 lines, remove the shell and make the crater
                 if (this.shellLineCollision(shells[j], p1, p2)) {
+                    const shellX = Math.floor(shells[j].position.x + shells[j].size * Math.cos(shells[j].angle));
+                    const shellY = Math.floor(shells[j].position.y + shells[j].size * Math.sin(shells[j].angle));
+
+                    // get the slope in between the 2 points for making the crater
+                    const dx = p2.x - p1.x;
+                    const dy = p2.y - p1.y;
+                    const slope = dy/dx;
+
+                    // make the 2 outside crater points
+                    const crater1Y = (slope * (shellX - p1.x - 10)) + p1.y;
+                    const crater2Y = (slope * (shellX - p1.x + 10)) + p1.y
                     // make the crater at the point where the collision happened by adding more terrain points 
-                    console.log("----------------------------------------------------------")
-                    console.log("crater");
-                    console.log(shells[j].position);
-                    console.log(p1, p2);
+                    this.terrainPoints.splice(i+1, 0, {x: shellX - 10, y: crater1Y});
+                    this.terrainPoints.splice(i+2, 0, {x: shellX, y: shellY + (Math.random() * shells[j].mass/2) + shells[j].mass/2});
+                    this.terrainPoints.splice(i+3, 0, {x: shellX + 10, y: crater2Y});
+
+                    // make an explosion at the tip of the shell location
+                    ctx.fillStyle = "red";
+                    ctx.arc(shellX, shellY, shells[j].size*1.5, 0, 2*Math.PI);
+                    ctx.fill();
 
                     // get rid of the shell
                     shells.splice(j, 1);

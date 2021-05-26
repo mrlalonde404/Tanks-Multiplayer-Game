@@ -17,9 +17,8 @@ const mouse = {
     y: null
 };
 
-// make the terrain, with 17 starting fragmentss
+// make the terrain, with some starting fragmentss
 let terrain = new Terrain(300, 457, 10);
-console.log(terrain.terrainPoints);
 
 // make the player tank start randomly on the left most quarter of the world
 let terrLength= terrain.terrainPoints.length;
@@ -110,7 +109,7 @@ function handleShells(delta) {
 }
 
 function handleTerrain() {
-    terrain.update(shells);
+    terrain.update(shells, ctx);
     terrain.draw(ctx);
 }
 

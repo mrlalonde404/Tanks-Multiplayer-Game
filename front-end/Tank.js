@@ -24,7 +24,7 @@ export default class Tank {
         this._health = 100;
 
         // how many pixels the tank can move per turn
-        this._fuel = 2000;
+        this._fuel = 500;
 
         // how big the tank is
         this._size = 20;
@@ -95,7 +95,9 @@ export default class Tank {
     }
 
     fireShell(mass, shellSize) {
+        // convert the angle from degrees to radians for the math functions
         let angle = this.barrelAngle/180.0 * Math.PI;
+
         // adjust the shell to start at the tip of the tank barrel
         return new Shell(this.position.x + this.size * Math.cos(angle), this.position.y + 1.72 * this.size * Math.sin(angle), angle, this.power, mass, shellSize);
     }
@@ -148,7 +150,6 @@ export default class Tank {
 
         // change the tilt of the tank according to the slope of the segment it is resting on
         this.tiltAngle = Math.atan2(dy, dx);
-        //console.log(this.position);
     }
 
     draw(ctx) {
@@ -173,14 +174,5 @@ export default class Tank {
         ctx.fill();
         ctx.closePath();
         ctx.restore();
-
-        /*
-        // draw the center point of the tank
-        ctx.beginPath()
-        ctx.fillStyle = "black";
-        ctx.arc(this.position.x, this.position.y, 1, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.closePath();
-        */
     }
 }
