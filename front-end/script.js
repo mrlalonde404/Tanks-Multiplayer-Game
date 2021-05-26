@@ -1,11 +1,18 @@
 import Tank from "./Tank.js";
 import Terrain from "./Terrain.js";
+import { io } from "socket.io-client"
 
 // get the canvas and context for drawing to the screen
 const canvas = document.getElementById("canvas1");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 const ctx = canvas.getContext("2d");
+
+// make the client connection
+const socket = io("http://localhost:5500");
+socket.on('init', function(msg) {
+    console.log(msg);
+});
 
 
 // the last time stamp, used for getting the delta time between frames for updating objects
