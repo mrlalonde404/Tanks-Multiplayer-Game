@@ -1,4 +1,5 @@
 import Tank from "./Tank.js";
+import Terrain from "./Terrain.js";
 
 // get the canvas and context for drawing to the screen
 const canvas = document.getElementById("canvas1");
@@ -16,8 +17,14 @@ const mouse = {
     y: null
 };
 
-// make the player tank
-let player1 = new Tank(100, canvas.height - 100, -45.0);
+// make the terrain, with 17 starting fragmentss
+let terrain = new Terrain(300, 457, 10);
+console.log(terrain.terrainPoints);
+
+// make the player tank start randomly on the left most quarter of the world
+let terrLength= terrain.terrainPoints.length;
+let startPoint = Math.floor(Math.random() * terrLength/5) + 1;
+let player1 = new Tank(terrain.terrainPoints[startPoint].x, terrain.terrainPoints[startPoint].y, -45.0);
 
 // arrays for the game
 const shells = [];
@@ -35,18 +42,21 @@ window.addEventListener("click", function(event) {
     mouse.x = event.x;
     mouse.y = event.y;
 
-    // get the difference in y and x for the mouse and player positions, take the atan2 of the dy and dx, then convert to degrees and floor to get a integer degree value
-    player1.barrelAngle = Math.floor(Math.atan2((mouse.y - player1.position.y), (mouse.x - player1.position.x)) / Math.PI * 180);
-   
-});
+    // get the previous barrelAngle
+    const barrelAngle = player1.barrelAngle/180.0 * Math.PI;
 
+    // get the difference in y and x for the mouse and player positions, take the atan2 of the dy and dx, then convert to degrees and floor to get a integer degree value
+    player1.barrelAngle = Math.floor(Math.atan2((mouse.y - (player1.position.y + player1.size * Math.cos(barrelAngle))), (mouse.x - (player1.position.x + 1.72 * player1.size * Math.sin(barrelAngle)))) / Math.PI * 180);
+});
 
 window.addEventListener('keydown', function(event) {
     if (event.key == "a") { // press the a key to make the tank move to the left and use fuel
         player1.move("left");
+        console.log("pos:", player1.position);
     }
     else if (event.key == "d") { // press the d key to make the tank move to the right and use fuel
         player1.move("right");
+        console.log("pos: ", player1.position);
     }
     else if (event.key == "ArrowLeft") { // press left arrow to make tank barrel face left
         if (player1.barrelAngle > -180) {
@@ -87,7 +97,6 @@ function init() {
 
 function handleShells(delta) {
     for (let i = 0; i < shells.length; i++) {
-        // update the shells and draw them
         shells[i].update(delta);
         shells[i].draw(ctx);
 
@@ -100,8 +109,14 @@ function handleShells(delta) {
     }
 }
 
+function handleTerrain() {
+    terrain.update(shells);
+    terrain.draw(ctx);
+}
+
 function handlePlayer() {
-    // draw player1
+    // update the player's tilt angle and height according to what terrain segments it lies between
+    player1.update(terrain);
     player1.draw(ctx);
 }
 
@@ -111,11 +126,14 @@ function gameLoop(timeStamp){
     lastTime = timeStamp;
 
     // clear the screen
-    ctx.fillStyle = "white";
+    ctx.fillStyle = "#87CEEB";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // update and draw all the shells
     handleShells(delta);
+
+    // update and draw the terrain
+    handleTerrain();
 
     // update and draw the player
     handlePlayer();

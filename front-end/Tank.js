@@ -8,8 +8,14 @@ export default class Tank {
             y: ty
         };
 
+        // how much the player can move per unit of fuel
+        this._moveSpeed = 3;
+
         // the angle the barrel is pointing towards, store this angle in degrees
         this._barrelAngle = ba;
+
+        // how much the body of the tank is tilting
+        this._tiltAngle = 0;
 
         // what the power is currently set to
         this._power = 75;
@@ -18,7 +24,7 @@ export default class Tank {
         this._health = 100;
 
         // how many pixels the tank can move per turn
-        this._fuel = 100;
+        this._fuel = 2000;
 
         // how big the tank is
         this._size = 20;
@@ -28,8 +34,16 @@ export default class Tank {
         return this._position;
     }
 
+    get moveSpeed() {
+        return this._moveSpeed;
+    }
+
     get barrelAngle() {
         return this._barrelAngle;
+    }
+
+    get tiltAngle() {
+        return this._tiltAngle;
     }
 
     get power() {
@@ -52,8 +66,16 @@ export default class Tank {
         this._position = pos;
     }
 
+    set moveSpeed(ms) {
+        this._moveSpeed = ms;
+    }
+
     set barrelAngle(ba) {
         this._barrelAngle = ba;
+    }
+
+    set tiltAngle(ta) {
+        this._tiltAngle = ta;
     }
 
     set power(p) {
@@ -81,20 +103,59 @@ export default class Tank {
     move(direction) {
         if (this.fuel > 0) {
             if (direction == "left") {
-                this.position.x -= 1;
+                if (this.position.x - this.size - this.moveSpeed > 0) {
+                    this.position.x -= this.moveSpeed;
+                }
             }
             else if (direction == "right") {
-                this.position.x += 1;
+                if (this.position.x + this.size + this.moveSpeed < window.innerWidth) {
+                    this.position.x += this.moveSpeed;
+                }
             }
             this.fuel -= 1;
         }
+    }
+
+    update(terrain) {
+        // points for the line segment that the tank is resting on
+        let p1 = null;
+        let p2 = null;
+
+        // get the start and end points that the 
+        for (let i = 0; i < terrain.terrainPoints.length; i++) {
+            // if the tank is looking at the last terrain point, it is in between the second to last and last terrain points 
+            if (i === terrain.terrainPoints.length - 1) {
+                p1 = terrain.terrainPoints[i-1];
+                p2 = terrain.terrainPoints[i];
+                break;
+            }
+            // if the p1 point hasn't been found yet and the tank is in between the current point and the next point, set the terrain points
+            if (p1 === null && terrain.terrainPoints[i].x < this.position.x && this.position .x <= terrain.terrainPoints[i+1].x) {
+                p1 = terrain.terrainPoints[i];
+                p2 = terrain.terrainPoints[i+1];
+                break;
+            }
+        }
+
+        // get the difference in between the x's and y's for the segment between between p1 and p2
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const slope = dy/dx;
+
+        // get the height of the tank using slopt intercept
+        this.position.y = (slope * (this.position.x - p1.x)) + p1.y;
+        this.position.y -= this.size/2;
+
+        // change the tilt of the tank according to the slope of the segment it is resting on
+        this.tiltAngle = Math.atan2(dy, dx);
+        //console.log(this.position);
     }
 
     draw(ctx) {
         // draw the barrel for the tank that tilts according to the barrelAngle
         ctx.save();
         ctx.beginPath()
-        ctx.fillStyle = "blue";
+        ctx.fillStyle = "Gray";
         ctx.translate(this.position.x, this.position.y - this.size/2);
         ctx.rotate(this.barrelAngle/180 * Math.PI);
         ctx.fillRect(-this.size/4, -this.size/4, 2 * this.size, this.size/2);
@@ -103,17 +164,23 @@ export default class Tank {
         ctx.restore();
 
         // draw the rectangles for the tanks such that the center is in the middle
+        ctx.save();
         ctx.beginPath()
-        ctx.fillStyle = "red";
-        ctx.fillRect(this.position.x - this.size, this.position.y - this.size/2, 2*this.size, this.size);
+        ctx.fillStyle = "DimGray";
+        ctx.translate(this.position.x, this.position.y);
+        ctx.rotate(this.tiltAngle);
+        ctx.fillRect(-this.size, -this.size/2, 2*this.size, this.size);
         ctx.fill();
         ctx.closePath();
+        ctx.restore();
 
+        /*
         // draw the center point of the tank
         ctx.beginPath()
         ctx.fillStyle = "black";
         ctx.arc(this.position.x, this.position.y, 1, 0, 2 * Math.PI);
         ctx.fill();
         ctx.closePath();
+        */
     }
 }
