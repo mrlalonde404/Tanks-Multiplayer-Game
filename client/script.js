@@ -8,10 +8,17 @@ canvas.height = window.innerHeight;
 const ctx = canvas.getContext("2d");
 
 // make the client connection
-//const socket = io("http://localhost:5500");
-//socket.on('init', function(msg) {
-//    console.log(msg);
-//});
+const socket = io("http://localhost:3000");
+socket.on('connection', function(msg) {
+    console.log(msg);
+});
+
+// when the client connects to the server
+socket.on('connection', function(data) {
+    // send a message to the client acknowledging that they connected
+    socket.emit('join', 'Hello world from client');         
+    console.log("sent join message to client");     
+});
 
 
 // the last time stamp, used for getting the delta time between frames for updating objects

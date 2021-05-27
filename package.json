@@ -1,19 +1,27 @@
 {
   "name": "tanks_multiplayer_game",
   "version": "1.0.0",
-  "description": "A tanks game ran through a client-server system",
-  "main": "script.js",
+  "description": "Tanks multiplayer game with socket.io and express.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mrlalonde404/Tanks-Multiplayer-Game.git"
   },
-  "author": "Michael LaLonde",
+  "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/mrlalonde404/Tanks-Multiplayer-Game/issues"
   },
-  "homepage": "https://github.com/mrlalonde404/Tanks-Multiplayer-Game#readme"
+  "homepage": "https://github.com/mrlalonde404/Tanks-Multiplayer-Game#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^4.1.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
 }
