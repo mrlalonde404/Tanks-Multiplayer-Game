@@ -1,6 +1,7 @@
+const { WORLD_SIZE } = require("./constants.js");
+let Shell = require("./Shell.js");
 
-import Shell from "./Shell.js";
-export default class Tank {
+class Tank {
     constructor(tx, ty, ba) {
         // the center of the position of the tank
         this._position = {
@@ -110,7 +111,7 @@ export default class Tank {
                 }
             }
             else if (direction == "right") {
-                if (this.position.x + this.size + this.moveSpeed < window.innerWidth) {
+                if (this.position.x + this.size + this.moveSpeed < WORLD_SIZE.width) {
                     this.position.x += this.moveSpeed;
                 }
             }
@@ -151,28 +152,6 @@ export default class Tank {
         // change the tilt of the tank according to the slope of the segment it is resting on
         this.tiltAngle = Math.atan2(dy, dx);
     }
-
-    draw(ctx) {
-        // draw the barrel for the tank that tilts according to the barrelAngle
-        ctx.save();
-        ctx.beginPath()
-        ctx.fillStyle = "Gray";
-        ctx.translate(this.position.x, this.position.y - this.size/2);
-        ctx.rotate(this.barrelAngle/180 * Math.PI);
-        ctx.fillRect(-this.size/4, -this.size/4, 2 * this.size, this.size/2);
-        ctx.fill();
-        ctx.closePath();
-        ctx.restore();
-
-        // draw the rectangles for the tanks such that the center is in the middle
-        ctx.save();
-        ctx.beginPath()
-        ctx.fillStyle = "DimGray";
-        ctx.translate(this.position.x, this.position.y);
-        ctx.rotate(this.tiltAngle);
-        ctx.fillRect(-this.size, -this.size/2, 2*this.size, this.size);
-        ctx.fill();
-        ctx.closePath();
-        ctx.restore();
-    }
 }
+
+module.exports = Tank;

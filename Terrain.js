@@ -1,4 +1,6 @@
-export default class Terrain {
+const { WORLD_SIZE } = require("./constants.js");
+
+class Terrain {
     // need a start y and an end y for both sides of the screen to make terrain for
     constructor(sy, ey, numTerrainPoints) {
         // list of all the points that make up the terrain
@@ -22,20 +24,20 @@ export default class Terrain {
             numTerrainPoints = 5;
         }
 
-        // how far each starting point should be spaced apart, the whole window width divided by the number of terrain points requested
-        const xSpacing = Math.floor(window.innerWidth / numTerrainPoints);
+        // how far each starting point should be spaced apart, the whole world width divided by the number of terrain points requested
+        const xSpacing = Math.floor(WORLD_SIZE.width / numTerrainPoints);
 
         // the min and max values for the y, smallest is 100, max is the 3/5 the height of the screen
         const yMin = 200;
-        const yMax = Math.floor(3 * window.innerHeight / 5);
+        const yMax = Math.floor(3 * WORLD_SIZE.height / 5);
 
         for (let i = 0; i < numTerrainPoints; i++) {
             // add the point to the end of the points list
-            tp.push({x: i*xSpacing, y: window.innerHeight - ((Math.random() * (yMax - yMin)) + yMin)});
+            tp.push({x: i*xSpacing, y: WORLD_SIZE.height - ((Math.random() * (yMax - yMin)) + yMin)});
         }
 
-        // make the last point with the width of the window
-        tp[tp.length-1].x = window.innerWidth
+        // make the last point with the width of the world
+        tp[tp.length-1].x = WORLD_SIZE.width;
         
         // return the new list of terrain points
         return tp;
@@ -90,7 +92,7 @@ export default class Terrain {
     }
 
 
-    update(shells, ctx) {
+    update(shells) {
         // loop through the shells and see if there is a collision
         for (let j = 0; j < shells.length; j++) {
             // only loop from first to second to last, at the last point you cant check for the one past it, so stop
@@ -121,11 +123,6 @@ export default class Terrain {
                     this.terrainPoints.splice(i+2, 0, {x: shellX, y: shellY + (Math.random() * shells[j].mass/2) + shells[j].mass/2});
                     this.terrainPoints.splice(i+3, 0, {x: shellX + 10, y: crater2Y});
 
-                    // make an explosion at the tip of the shell location
-                    ctx.fillStyle = "red";
-                    ctx.arc(shellX, shellY, shells[j].size*1.5, 0, 2*Math.PI);
-                    ctx.fill();
-
                     // get rid of the shell
                     shells.splice(j, 1);
                     break;
@@ -133,27 +130,6 @@ export default class Terrain {
             }
         }
     }
-
-    draw(ctx) {
-        ctx.beginPath()
-        ctx.fillStyle = "green";
-
-        // for all the terrain points starting from the second, move the canvas pen to the previous point location and draw to the current point location
-        ctx.moveTo(this.terrainPoints[0].x, this.terrainPoints[0].y); 
-        for (let i = 1; i < this.terrainPoints.length; i++) {
-            ctx.lineTo(this.terrainPoints[i].x, this.terrainPoints[i].y);
-        }
-        // draw to the bottom right corner
-        ctx.lineTo(window.innerWidth, window.innerHeight);
-
-        // draw to the bottom left corner
-        ctx.lineTo(0, window.innerHeight);
-
-        // draw back to the first point
-        ctx.lineTo(this.terrainPoints[0].x, this.terrainPoints[0].y);
-
-        // close the path and fill in the terrain
-        ctx.closePath();
-        ctx.fill();
-    }
 }
+
+module.exports = Terrain;

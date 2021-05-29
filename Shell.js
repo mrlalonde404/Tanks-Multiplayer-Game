@@ -1,4 +1,4 @@
-export default class Shell {
+class Shell {
     constructor(sx, sy, angle, power, mass, size) {
         // position of the shell in the air
         this._position = {
@@ -77,24 +77,6 @@ export default class Shell {
         // update the angle that the shell is flying in
         this.angle = Math.atan2(this.velocity.y, this.velocity.x);
     }
-
-    draw(ctx) {
-        // save the state before the translate and rotate so that the context can be restored to this point
-        ctx.save();
-        ctx.beginPath();
-        ctx.fillStyle = "black";
-
-        // translate to the center of the shell and then rotate it by the shell's angle
-        ctx.translate(this.position.x, this.position.y);
-        ctx.rotate(this.angle);
-
-        // draw the back rectangle end of the shell
-        ctx.fillRect(-this.size*2, -this.size, this.size*2, this.size*2);
-
-        // draw the front of the shell that will rotate according to the angle of the shell
-        ctx.arc(0, 0, this.size, -Math.PI/2, Math.PI/2);
-        ctx.fill();
-        ctx.closePath();
-        ctx.restore();
-    }
 }
+
+module.exports = Shell;
