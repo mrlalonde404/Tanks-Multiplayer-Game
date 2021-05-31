@@ -121,9 +121,8 @@ function gameInterval(client, state) {
         } else {
             // there is a winner, winner either equals 1 or 2 depending on which player won the game
             // send the game over message to the client and clear the current intervalId
-            client.emit('gameOver');
+            client.emit('gameOver', {playerWinner: winner});
             clearInterval(intervalId);
         }
     }, 1000 / FRAME_RATE);
-    //console.log(intervalId);
 }

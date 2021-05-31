@@ -20,6 +20,8 @@ socket.on('init', handleInit);
 // when the server sends an updated game state, handle the new state
 socket.on('gameState', handleGameState);
 
+socket.on('gameOver', handleGameOver);
+
 // handle the init message from the server
 function handleInit(init) {
     // log the client's socket id
@@ -58,7 +60,7 @@ const mouse = {
 // draw the state of the game on the clients screen
 function drawGame(gameState) {
     // if you want to see the collision boxes on the shells and players, set this to true
-    const drawCollisionBox = true;
+    const drawCollisionBox = false;
 
     // clear the screen
     ctx.fillStyle = "#87CEEB";
@@ -101,21 +103,48 @@ window.addEventListener('keydown', function(event) {
 
 function drawPlayer(player, drawCollisionBox) {
     // draw the barrel for the tank that tilts according to the barrelAngle
+    
     ctx.save();
     ctx.beginPath()
     ctx.fillStyle = "Gray";
     ctx.translate(player._position.x, player._position.y - player._size/2);
     ctx.rotate(player._tiltAngle + (player._barrelAngle/180 * Math.PI));
-    ctx.fillRect(player._size/4, -player._size/4, 1.5 * player._size, player._size/3);
+    ctx.fillRect(player._size/4, -player._size/4, player._size, player._size/3);
     ctx.fill();
     // draw an outline for the tank barrel
     ctx.strokeStyle = "black";
-    ctx.strokeRect(player._size/4, -player._size/4, 1.5 * player._size, player._size/3);
+    ctx.strokeRect(player._size/4, -player._size/4, player._size, player._size/3);
     ctx.stroke();
     ctx.closePath();
     ctx.restore();
-    
+    /*
+    // draw the barrel on the tank
+    const barrelAngle = player._barrelAngle/180 * Math.PI;
+    ctx.save();
+    ctx.beginPath()
+    ctx.fillStyle = `DimGray`;
+    ctx.translate(player._position.x, player._position.y);
+    ctx.rotate(player._tiltAngle);
 
+    // center of base of barrel
+    ctx.moveTo(0, -player._size/2);
+    ctx.lineTo(-0.5*player._size*Math.cos(barrelAngle), -0.5*player._size*Math.sin(barrelAngle));
+    ctx.lineTo(1.5*player._size*Math.cos(barrelAngle), player._size*Math.sin(barrelAngle));
+    ctx.lineTo(player._size*Math.cos(barrelAngle), player._size*Math.sin(barrelAngle));
+    ctx.lineTo(0.5*player._size*Math.cos(barrelAngle), 0.5*player._size*Math.sin(barrelAngle));
+    ctx.lineTo(player._size*Math.cos(barrelAngle), player._size*Math.sin(barrelAngle));
+    
+    // back to beginning
+    ctx.lineTo(0, -player._size/2);
+    ctx.fill();
+    // draw an outline for the tank barrel
+    ctx.strokeStyle = "black";
+    ctx.stroke();
+    ctx.closePath();
+    ctx.restore();
+    */
+
+    
     // draw the top dome on the tank
     ctx.save();
     ctx.beginPath()
@@ -130,29 +159,56 @@ function drawPlayer(player, drawCollisionBox) {
     ctx.closePath();
     ctx.restore();
 
-    // draw the rectangle for the tank body such that the center is in the middle
+    // draw the tank body such that the center is in the middle
     ctx.save();
     ctx.beginPath()
     ctx.fillStyle = "DimGray";
     ctx.translate(player._position.x, player._position.y);
     ctx.rotate(player._tiltAngle);
-    ctx.fillRect(-player._size, -player._size/2, 2*player._size, player._size);
+    // top left corner
+    ctx.moveTo(-player._size, -player._size/3);
+    // top right corner
+    ctx.lineTo(player._size, -player._size/3);
+    // bottom right corner
+    ctx.lineTo(0.7*player._size, player._size/2);
+    // bottom left corner
+    ctx.lineTo(-0.7*player._size, player._size/2);
+    // line back to the beginning
+    ctx.lineTo(-player._size, -player._size/3);
     ctx.fill();
     // draw an outline for the tank body
     ctx.strokeStyle = "black";
-    ctx.strokeRect(-player._size, -player._size/2, 2*player._size, player._size);
     ctx.stroke();
     ctx.closePath();
     ctx.restore();
 
     // draw the wheels for the tank
     ctx.save();
-    ctx.beginPath()
     ctx.fillStyle = `rgba(0,0,0,0.6)`;
     ctx.translate(player._position.x, player._position.y);
     ctx.rotate(player._tiltAngle);
-    ctx.arc(-player._size/2, 0, player._size/3, 0, 2*Math.PI);
-    ctx.arc(player._size/2, 0, player._size/3, 0, 2*Math.PI);
+    ctx.beginPath();
+    ctx.arc(-0.7*player._size, -0.1*player._size, player._size/5, 0, 2*Math.PI);
+    ctx.fill();
+    ctx.closePath();
+    ctx.beginPath();
+    ctx.arc(0.7*player._size, -0.1*player._size, player._size/5, 0, 2*Math.PI);
+    ctx.fill();
+    ctx.closePath();
+    ctx.beginPath();
+    ctx.arc(-0.55*player._size, 0.25*player._size, player._size/6, 0, 2*Math.PI);
+    ctx.fill();
+    ctx.closePath();
+    ctx.beginPath();
+    ctx.arc(-0.2*player._size, 0.3*player._size, player._size/6, 0, 2*Math.PI);
+    ctx.fill();
+    ctx.closePath();
+    ctx.beginPath();
+    ctx.arc(0.2*player._size, 0.3*player._size, player._size/6, 0, 2*Math.PI);
+    ctx.fill();
+    ctx.closePath();
+    ctx.beginPath();
+    ctx.arc(0.55*player._size, 0.25*player._size, player._size/6, 0, 2*Math.PI);
     ctx.fill();
     ctx.closePath();
     ctx.restore();
@@ -225,4 +281,11 @@ function drawTerrain(terrain, worldSize) {
     // close the path and fill in the terrain
     ctx.closePath();
     ctx.fill();
+}
+
+// draw who won to the screen
+function handleGameOver(data) {
+    ctx.font = "30px Arial";
+    ctx.fillStyle = "Black";
+    ctx.fillText(`Player ${data.playerWinner} won!`, canvas.width/2 - 50, canvas.height/2 - 50); 
 }

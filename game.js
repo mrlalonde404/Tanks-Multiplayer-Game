@@ -43,6 +43,8 @@ function updateGame(state, delta) {
                 playerToCheck.health -= 25;
                 console.log(`${playerToCheck.playerId} was hit with a shell`);
 
+                console.log(`Player 1 health: ${state.player1.health}, Player 2 health: ${state.player2.health}`);
+
                 // remove the shell from the state's shells list
                 state.shells.splice(i, 1);
 
@@ -67,10 +69,10 @@ function updateGame(state, delta) {
     state.player2.update(state.terrain);
 
     // handle win condition logic
-    if (state.player1._life <= 0) {
+    if (state.player1.health <= 0) {
         // player 2 won by defeating player 1
         return 2;
-    } else if (state.player2._life <= 0) {
+    } else if (state.player2.health <= 0) {
         // player 1 won by defeating player 2
         return 1;
     }

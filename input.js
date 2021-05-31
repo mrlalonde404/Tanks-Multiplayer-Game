@@ -7,10 +7,13 @@ function handleClick(player, mx, my) {
 function updatePlayerBarrel(player, mx, my) {
     // get the previous barrelAngle
     const barrelAngle = player._barrelAngle/180.0 * Math.PI;
-    const tilt = player.tiltAngle;
 
-    // get the difference in y and x for the mouse and player positions, take the atan2 of the dy and dx, then convert to degrees and floor to get a integer degree value
-    player._barrelAngle = Math.floor(Math.atan2((my - (player._position.y + player._size * Math.cos(barrelAngle + tilt))), (mx - (player._position.x + 1.72 * player._size * Math.sin(barrelAngle + tilt)))) / Math.PI * 180);
+    // get the difference in y and x for the mouse and player positions
+    const dy = (my - (player._position.y - 2*player._size + player._size * Math.sin(barrelAngle)));
+    const dx = (mx - (player._position.x + player._size * Math.cos(barrelAngle)));
+    
+    // take the atan2 of the dy and dx, then convert to degrees and floor to get a integer degree value
+    player._barrelAngle = Math.floor(180 * Math.atan2(dy, dx) / Math.PI);
 }
 
 function handleKeyInput(player, key, shells) {
