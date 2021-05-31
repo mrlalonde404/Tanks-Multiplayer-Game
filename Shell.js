@@ -1,5 +1,5 @@
 class Shell {
-    constructor(sx, sy, angle, power, mass, size) {
+    constructor(sx, sy, angle, power, mass, size, from) {
         // position of the shell in the air
         this._position = {
             x: sx,
@@ -20,6 +20,9 @@ class Shell {
 
         // size of the shell
         this._size = size;
+
+        // who shot the shell
+        this._fromPlayer = from;
     }
 
     get position() {
@@ -42,6 +45,10 @@ class Shell {
         return this._size;
     }
 
+    get fromPlayer() {
+        return this._fromPlayer;
+    }
+
     set position(pos) {
         this._position = pos;
     }
@@ -60,6 +67,10 @@ class Shell {
 
     set size(s) {
         this._size = s;
+    }
+
+    set fromPlayer(f) {
+        this._fromPlayer = f;
     }
 
     update(delta) {

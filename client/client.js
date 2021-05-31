@@ -1,14 +1,18 @@
 // get the canvas and context for drawing to the screen
-const canvas = document.getElementById("canvas1");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-const ctx = canvas.getContext("2d");
+let canvas, ctx;
 
 // make the client connection
 const socket = io.connect("http://localhost:3000");
 
 // the player object
-let player = null;
+let player;
+
+function init() {
+    canvas = document.getElementById("canvas1");
+    ctx = canvas.getContext("2d");
+}
+
+init();
 
 // when the client gets the init message from the server, handle the lcient init process
 socket.on('init', handleInit);
@@ -99,18 +103,49 @@ function drawPlayer(player) {
     ctx.fillStyle = "Gray";
     ctx.translate(player._position.x, player._position.y - player._size/2);
     ctx.rotate(player._barrelAngle/180 * Math.PI);
-    ctx.fillRect(-player._size/4, -player._size/4, 2 * player._size, player._size/2);
+    ctx.fillRect(0, -player._size/4, 1.5 * player._size, player._size/2);
     ctx.fill();
     ctx.closePath();
     ctx.restore();
 
-    // draw the rectangles for the tanks such that the center is in the middle
+    // draw the top dome on the tank
+    ctx.save();
+    ctx.beginPath()
+    ctx.fillStyle = `DimGray`;
+    ctx.translate(player._position.x, player._position.y);
+    ctx.rotate(player._tiltAngle);
+    ctx.arc(0, -player._size/2, player._size/2, Math.PI, -Math.PI);
+    ctx.fill();
+
+    // draw an outline for the dome
+    ctx.strokeStyle = "black";
+    ctx.stroke();
+    ctx.closePath();
+    ctx.restore();
+
+    // draw the rectangle for the tank body such that the center is in the middle
     ctx.save();
     ctx.beginPath()
     ctx.fillStyle = "DimGray";
     ctx.translate(player._position.x, player._position.y);
     ctx.rotate(player._tiltAngle);
     ctx.fillRect(-player._size, -player._size/2, 2*player._size, player._size);
+    ctx.fill();
+    // draw an outline for the tank body
+    ctx.strokeStyle = "black";
+    ctx.strokeRect(-player._size, -player._size/2, 2*player._size, player._size);
+    ctx.stroke();
+    ctx.closePath();
+    ctx.restore();
+
+    // draw the wheels for the tank
+    ctx.save();
+    ctx.beginPath()
+    ctx.fillStyle = `rgba(0,0,0,0.6)`;
+    ctx.translate(player._position.x, player._position.y);
+    ctx.rotate(player._tiltAngle);
+    ctx.arc(-player._size/2, 0, player._size/3, 0, 2*Math.PI);
+    ctx.arc(player._size/2, 0, player._size/3, 0, 2*Math.PI);
     ctx.fill();
     ctx.closePath();
     ctx.restore();

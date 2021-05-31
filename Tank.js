@@ -29,6 +29,9 @@ class Tank {
 
         // how big the tank is
         this._size = 20;
+
+        // the players socket id
+        this.playerId = 0;
     }
 
     get position() {
@@ -100,7 +103,7 @@ class Tank {
         let angle = this.barrelAngle/180.0 * Math.PI;
 
         // adjust the shell to start at the tip of the tank barrel
-        return new Shell(this.position.x + this.size * Math.cos(angle), this.position.y + 1.72 * this.size * Math.sin(angle), angle, this.power, mass, shellSize);
+        return new Shell(this.position.x + this.size * Math.cos(angle), this.position.y + 1.72 * this.size * Math.sin(angle), angle, this.power, mass, shellSize, this.playerId);
     }
 
     move(direction) {
@@ -148,9 +151,19 @@ class Tank {
         // get the height of the tank using slopt intercept
         this.position.y = (slope * (this.position.x - p1.x)) + p1.y;
         this.position.y -= this.size/2;
+        const tilt = Math.atan2(dy, dx);
+        const tiltDeg = Math.floor(tilt * 180.0 / Math.PI);
 
-        // change the tilt of the tank according to the slope of the segment it is resting on
-        this.tiltAngle = Math.atan2(dy, dx);
+
+        // if the slope changed then the body angle and the barrel angle need to change too
+        if (Math.floor(this.tiltAngle * 180 / Math.PI) != tiltDeg) {
+            // change the tilt of the tank according to the slope of the segment it is resting on
+            this.tiltAngle = tilt;
+
+            // update the barrel angle to also move when the tank angle changes
+            //console.log(this.playerId, this.barrelAngle);
+            this.barrelAngle = Math.floor((this.barrelAngle + tiltDeg) * Math.PI /180.0);
+        }
     }
 }
 

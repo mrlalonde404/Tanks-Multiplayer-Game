@@ -67,11 +67,13 @@ function newConnection(client) {
     // log that a client connection was made and send a message to the client ackowledging that they connected
     console.log(`Client connected: ${client.id}`);
 
-    // make the player object and send them a message with their socket id
+    // assign the client id to the player and add the player to the players object with their socket id as the key
     numPlayers += 1;
     if (numPlayers === 1) {
+        player1.playerId = client.id;
         players[client.id] = player1;
     } else if (numPlayers === 2) {
+        player2.playerId = client.id;
         players[client.id] = player2;
     }
     console.log(players);
