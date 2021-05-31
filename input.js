@@ -7,9 +7,10 @@ function handleClick(player, mx, my) {
 function updatePlayerBarrel(player, mx, my) {
     // get the previous barrelAngle
     const barrelAngle = player._barrelAngle/180.0 * Math.PI;
+    const tilt = player.tiltAngle;
 
     // get the difference in y and x for the mouse and player positions, take the atan2 of the dy and dx, then convert to degrees and floor to get a integer degree value
-    player._barrelAngle = Math.floor(Math.atan2((my - (player._position.y + player._size * Math.cos(barrelAngle))), (mx - (player._position.x + 1.72 * player._size * Math.sin(barrelAngle)))) / Math.PI * 180);
+    player._barrelAngle = Math.floor(Math.atan2((my - (player._position.y + player._size * Math.cos(barrelAngle + tilt))), (mx - (player._position.x + 1.72 * player._size * Math.sin(barrelAngle + tilt)))) / Math.PI * 180);
 }
 
 function handleKeyInput(player, key, shells) {
@@ -42,7 +43,7 @@ function handleKeyInput(player, key, shells) {
     if (key == "Enter" || key == " ") { // press enter or space bar to shoot
         // attributes for the shell that the tank will fire
         let mass = 10;
-        let shellSize = 6;
+        let shellSize = 4;
     
         // make the player's tank fire a shell and put it into the array of shells
         shells.push(player.fireShell(mass, shellSize));

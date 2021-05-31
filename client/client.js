@@ -57,19 +57,22 @@ const mouse = {
 
 // draw the state of the game on the clients screen
 function drawGame(gameState) {
+    // if you want to see the collision boxes on the shells and players, set this to true
+    const drawCollisionBox = true;
+
     // clear the screen
     ctx.fillStyle = "#87CEEB";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     //draw all the shells
-    drawShells(gameState.shells);
+    drawShells(gameState.shells, drawCollisionBox);
 
     // update and draw the terrain
     drawTerrain(gameState.terrain, gameState.worldSize);
 
     // draw the players
-    drawPlayer(gameState.player1);
-    drawPlayer(gameState.player2);
+    drawPlayer(gameState.player1, drawCollisionBox);
+    drawPlayer(gameState.player2, drawCollisionBox);
 }
 
 // -- Event listeners
@@ -96,17 +99,22 @@ window.addEventListener('keydown', function(event) {
 });
 // -- End of event listeners
 
-function drawPlayer(player) {
+function drawPlayer(player, drawCollisionBox) {
     // draw the barrel for the tank that tilts according to the barrelAngle
     ctx.save();
     ctx.beginPath()
     ctx.fillStyle = "Gray";
     ctx.translate(player._position.x, player._position.y - player._size/2);
-    ctx.rotate(player._barrelAngle/180 * Math.PI);
-    ctx.fillRect(0, -player._size/4, 1.5 * player._size, player._size/2);
+    ctx.rotate(player._tiltAngle + (player._barrelAngle/180 * Math.PI));
+    ctx.fillRect(player._size/4, -player._size/4, 1.5 * player._size, player._size/3);
     ctx.fill();
+    // draw an outline for the tank barrel
+    ctx.strokeStyle = "black";
+    ctx.strokeRect(player._size/4, -player._size/4, 1.5 * player._size, player._size/3);
+    ctx.stroke();
     ctx.closePath();
     ctx.restore();
+    
 
     // draw the top dome on the tank
     ctx.save();
@@ -116,7 +124,6 @@ function drawPlayer(player) {
     ctx.rotate(player._tiltAngle);
     ctx.arc(0, -player._size/2, player._size/2, Math.PI, -Math.PI);
     ctx.fill();
-
     // draw an outline for the dome
     ctx.strokeStyle = "black";
     ctx.stroke();
@@ -149,10 +156,18 @@ function drawPlayer(player) {
     ctx.fill();
     ctx.closePath();
     ctx.restore();
+
+    if(drawCollisionBox) {
+        ctx.beginPath()
+        ctx.fillStyle = `rgba(255,0,0,0.6)`;
+        ctx.arc(player._position.x, player._position.y, player._size, 0, 2*Math.PI);
+        ctx.fill();
+        ctx.closePath();
+    }
 }
 
 // draw a shell
-function drawShell(shell) {
+function drawShell(shell, drawCollisionBox) {
     // save the state before the translate and rotate so that the context can be restored to this point
     ctx.save();
     ctx.beginPath();
@@ -170,12 +185,20 @@ function drawShell(shell) {
     ctx.fill();
     ctx.closePath();
     ctx.restore();
+
+    if(drawCollisionBox) {
+        ctx.beginPath()
+        ctx.fillStyle = `rgba(255,0,0,0.6)`;
+        ctx.arc(shell._position.x, shell._position.y, shell._size, 0, 2*Math.PI);
+        ctx.fill();
+        ctx.closePath();
+    }
 }
 
 // draw all the shells
-function drawShells(shells) {
+function drawShells(shells, drawShellsCollision) {
     for (let i = 0; i < shells.length; i++) {
-        drawShell(shells[i]);
+        drawShell(shells[i], drawShellsCollision);
     }
 }
 

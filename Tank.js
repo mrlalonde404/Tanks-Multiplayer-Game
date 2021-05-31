@@ -101,6 +101,7 @@ class Tank {
     fireShell(mass, shellSize) {
         // convert the angle from degrees to radians for the math functions
         let angle = this.barrelAngle/180.0 * Math.PI;
+        angle += this.tiltAngle;
 
         // adjust the shell to start at the tip of the tank barrel
         return new Shell(this.position.x + this.size * Math.cos(angle), this.position.y + 1.72 * this.size * Math.sin(angle), angle, this.power, mass, shellSize, this.playerId);
@@ -161,8 +162,7 @@ class Tank {
             this.tiltAngle = tilt;
 
             // update the barrel angle to also move when the tank angle changes
-            //console.log(this.playerId, this.barrelAngle);
-            this.barrelAngle = Math.floor((this.barrelAngle + tiltDeg) * Math.PI /180.0);
+            //this.barrelAngle += tiltDeg;
         }
     }
 }
