@@ -5,7 +5,7 @@ let Tank = require("./Tank.js");
 const { WORLD_SIZE, FRAME_RATE, NUM_TERRAIN_POINTS } = require("./constants.js");
 
 // game functions for the server that have to deal with the state of the game
-const { createGameState, updateGame, initGame } = require("./game.js");
+const { updateGame, initGame } = require("./game.js");
 
 // functions for when the client clicks or presses a key
 const { handleClick, handleKeyInput } = require("./input.js");
@@ -55,48 +55,6 @@ function handleConnection(client) {
     // log that a client connection was made and send a message to the client ackowledging that they connected
     console.log(`Client connected: ${client.id}`);
 
-    // when a player clicks on the screen
-    client.on('playerClick', function(data) {
-        // get what room the client is in
-        const roomName = clientRooms[client.id];
-        if (!roomName) {
-            return;
-        }
-
-        // get the player depending on the client number
-        let player;
-        if (client.number === 1) {
-            player = state[roomName].player1;
-        } else if (client.number === 2) {
-            player = state[roomName].player2;
-        }
-
-        // log the client details and handle the click for the player based on the mouse data
-        console.log(`client ${client.id}: clicked at (${data.x},${data.y})`);
-        handleClick(player, data.x, data.y);
-    });
-
-    // when a player presses down on a key
-    client.on('playerKeyDown', function(data) {
-        // get what room the client is in
-        const roomName = clientRooms[client.id];
-        if (!roomName) {
-            return;
-        }
-
-        // get the player depending on the client number
-        let player;
-        if (client.number === 1) {
-            player = state[roomName].player1;
-        } else if (client.number === 2) {
-            player = state[roomName].player2;
-        }
-
-        // log the client details and handle the key for the player based on the key data
-        console.log(`client ${client.id}: pressed key(${data.key})`);
-        handleKeyInput(player, data.key, state[roomName].shells);
-    });
-
     // when a person starts a new game on the server
     client.on('newGame', handleNewGame);
 
@@ -107,6 +65,58 @@ function handleConnection(client) {
     client.on('disconnect', function () {
         console.log(`Client disconnected: ${client.id}`);
     });
+
+    
+
+    // when a player clicks on the screen
+    client.on('playerClick', function(data) {
+        // get what room the client is in
+        const roomName = clientRooms[client.id];
+
+        if (!roomName) {
+            return;
+        }
+
+        // if the player is in the room and it is their turn, then let them move around, change angle and power, and shoot
+        // make sure the other players shell lands before the new player can move
+        if (client.id === state[roomName].turn && state[roomName].shells.length === 0) {
+            // get the player depending on the client number
+            let player;
+            if (client.number === 1) {
+                player = state[roomName].player1;
+            } else if (client.number === 2) {
+                player = state[roomName].player2;
+            }
+
+            // log the client details and handle the click for the player based on the mouse data
+            console.log(`client ${client.id}: clicked at (${data.x},${data.y})`);
+            handleClick(player, data.x, data.y);
+        }
+    });
+
+        // when a player presses down on a key
+        client.on('playerKeyDown', function(data) {
+            // get what room the client is in
+            const roomName = clientRooms[client.id];
+            if (!roomName) {
+                return;
+            }
+
+            // get the player depending on the client number
+            let player;
+            if (client.number === 1) {
+                player = state[roomName].player1;
+            } else if (client.number === 2) {
+                player = state[roomName].player2;
+            }
+            // if the player is in the room and it is their turn, then let them move around, change angle and power, and shoot
+            // make sure the other players shell lands before the new player can move
+            if (client.id === state[roomName].turn && state[roomName].shells.length === 0) {
+                // log the client details and handle the key for the player based on the key data
+                console.log(`client ${client.id}: pressed key(${data.key})`);
+                handleKeyInput(player, data.key, state[roomName].shells);
+            }
+        });
 
     // definition for newGame function
     function handleNewGame() {
@@ -151,9 +161,10 @@ function handleConnection(client) {
         // count how many clients have used the specific game code the player entered(the roomName) to see how many people are in the game we are trying to join
         let numClients = 0;
         for (let val of gameCodes) {
-           if (val === roomName) {
+            // if there is a game code that matches the room name, then increment the number of clients in the room
+            if (val === roomName) {
                numClients++;
-           }
+            }
         }
 
         // if there are no clients and the client tried to join, then this game code isb't valid
@@ -182,12 +193,17 @@ function handleConnection(client) {
                         player: player2,
                         playerNumber: 2
                     });
-        
-        // start the game for this room
-        startGameInterval(roomName);
 
         // add the second player to the state for this room
         state[roomName].player2 = player2;
+
+        // when the second player joins the game, set the this game's turn to the first player's id
+        state[roomName].turn = state[roomName].player1.playerId;
+
+        console.log(state[roomName]);
+
+        // start the game for this room
+        startGameInterval(roomName);
     }
 }
 
@@ -200,7 +216,7 @@ function startGameInterval(roomName) {
         lastTime = timeStamp;
 
         // run the game loop as long as it returns 0, no winner
-        const winner = updateGame(state[roomName], delta);;
+        const winner = updateGame(state[roomName], delta);
         if (!winner) {
             emitGameState(roomName, state[roomName])
         } else {
@@ -220,5 +236,5 @@ function emitGameState(room, gameState) {
   
 function emitGameOver(room, winner) {
     // Send this event to everyone in the room.
-    io.sockets.in(room).emit('gameOver', JSON.stringify({ winner }));
+    io.sockets.in(room).emit('gameOver', {playerWinner: winner});
 }

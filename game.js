@@ -1,16 +1,6 @@
 const { WORLD_SIZE, NUM_TERRAIN_POINTS } = require("./constants.js");
 let Terrain = require("./Terrain.js");
 
-function createGameState(p1, p2, terrain, shells) {
-    return {
-        worldSize: WORLD_SIZE,
-        player1: p1,
-        player2: p2, 
-        terrain: terrain,
-        shells: shells
-    };
-}
-
 function updateGame(state, delta) {
     // if we are not given a state, do not loop
     if(!state) {
@@ -18,14 +8,14 @@ function updateGame(state, delta) {
     }
 
     // handle the shells
-    if (state.shells.length > 0){
+    if (state.shells.length > 0) {
         for (let i = 0; i < state.shells.length; i++) {
             // update the shell
             state.shells[i].update(delta);
 
             // see if the shell hit the other player
             // get the player that the shell was shot from
-            const from  = state.shells[i].fromPlayer;
+            const from = state.shells[i].fromPlayer;
 
             // get the other player to see if they were hit with the shell
             let playerToCheck;
@@ -59,6 +49,9 @@ function updateGame(state, delta) {
                 state.shells.splice(i, 1);
                 i--;
             }
+
+            // set the turn to the playerToCheck's player id
+            state.turn = playerToCheck.playerId;
         }
     }
 
@@ -88,12 +81,12 @@ function initGame() {
         player1: null,
         player2: null, 
         terrain: new Terrain(NUM_TERRAIN_POINTS),
-        shells: []
+        shells: [], 
+        turn: null
     };
 }
 
 module.exports = {
-    createGameState,
     updateGame,
     initGame
 };
