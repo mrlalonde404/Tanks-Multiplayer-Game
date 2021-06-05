@@ -129,7 +129,7 @@ function drawGame(gameState) {
     drawPlayer(gameState.player2, drawCollisionBox);
 
     // draw the values for tank values
-    drawPlayerValues(player);
+    drawPlayerValues(gameState);
 }
 
 // -- Event listeners
@@ -275,15 +275,27 @@ function drawPlayer(player, drawCollisionBox) {
     }
 }
 
-function drawPlayerValues(player) {
+function drawPlayerValues(gameState) {
     ctx.font = "30px Arial";
     ctx.fillStyle = "Black";
+    // tell the player what player they are
+    ctx.fillText(`Player: ${playerNumber}`, 10, 25); 
+    // draw value for players health
+    ctx.fillText(`Health: ${player._health}`, 150, 25); 
     // draw value for the angle of the barrel
-    ctx.fillText(`Angle: ${player._barrelAngle}`, canvas.width - 500, 25); 
+    ctx.fillText(`Angle: ${player._barrelAngle}`, 325, 25); 
     // draw the power level
-    ctx.fillText(`Power: ${player._power}`, canvas.width - 325, 25); 
+    ctx.fillText(`Power: ${player._power}`, 495, 25); 
     // draw the amount of fuel
-    ctx.fillText(`Fuel: ${player._fuel}`, canvas.width - 150, 25); 
+    ctx.fillText(`Fuel: ${player._fuel}`, 665, 25); 
+
+    // draw the enemy's health
+    if(playerNumber === 1) {
+        ctx.fillText(`Enemy Health: ${gameState.player2._health}`, canvas.width - 275, 25);  
+    } else if (playerNumber === 2) {
+        ctx.fillText(`Enemy Health: ${gameState.player1._health}`, canvas.width - 275, 25); 
+    }
+
 }
 
 // draw a shell
@@ -357,7 +369,13 @@ function handleGameOver(data) {
 
     ctx.font = "30px Arial";
     ctx.fillStyle = "Black";
-    ctx.fillText(`Player ${data.playerWinner} won!`, canvas.width/2 - 50, canvas.height/2 - 50); 
+
+    // if the player number matches the server winner, tell the player they won, otherwise, tell them they lost
+    if (playerNumber === data.playerWinner) {
+        ctx.fillText(`You Win!`, canvas.width/2 - 50, canvas.height/2 - 50); 
+    } else {
+        ctx.fillText(`You Lose!`, canvas.width/2 - 50, canvas.height/2 - 50); 
+    }
 }
 
 // display the game code on the screen so that the second player could then get the code
