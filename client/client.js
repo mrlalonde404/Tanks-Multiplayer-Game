@@ -1,18 +1,62 @@
 // get the canvas and context for drawing to the screen
 let canvas, ctx;
 
+// the player object for this client
+let player;
+
+// what number the player is
+let playerNumber;
+
+// if the game is being played or not
+let gameActive = false;
+
+// mouse object for world interaction
+const mouse = {
+    x: null, 
+    y: null
+};
+
 // make the client connection
 const socket = io.connect("http://localhost:3000");
 
-// the player object
-let player;
+// parts of the screen needed
+const gameScreen = document.getElementById('gameScreen');
+const initialScreen = document.getElementById('initialScreen');
+const newGameBtn = document.getElementById('newGameButton');
+const joinGameBtn = document.getElementById('joinGameButton');
+const gameCodeInput = document.getElementById('gameCodeInput');
+const gameCodeDisplay = document.getElementById('gameCodeDisplay');
 
-function init() {
-    canvas = document.getElementById("canvas1");
-    ctx = canvas.getContext("2d");
+//add the event listeners for initial screen's buttons
+newGameBtn.addEventListener('click', newGame);
+joinGameBtn.addEventListener('click', joinGame);
+
+// send the server a message to make a new game room
+function newGame() {
+  socket.emit('newGame');
+  init();
 }
 
-init();
+// send the server a message to join a game with the game code entered
+function joinGame() {
+  const code = gameCodeInput.value;
+  socket.emit('joinGame', code);
+  init();
+}
+
+// set values for the canvas and stop displaying the game code
+function init() {
+    // stop displaying the initial game code screen and display the game screen
+    initialScreen.style.display = "none";
+    gameScreen.style.display = "block";
+
+    // get the canvas and the context for the canvas
+    canvas = document.getElementById("canvas1");
+    ctx = canvas.getContext("2d");
+
+    // the game is now being played
+    gameActive = true;
+}
 
 // when the client gets the init message from the server, handle the lcient init process
 socket.on('init', handleInit);
@@ -20,16 +64,16 @@ socket.on('init', handleInit);
 // when the server sends an updated game state, handle the new state
 socket.on('gameState', handleGameState);
 
+// when the server sends the game over state, tell the players who won
 socket.on('gameOver', handleGameOver);
+
+// handle the game code if it is valid, if it is unknown, or if there are too many players for that code
+socket.on('gameCode', handleGameCode);
+socket.on('unknownCode', handleUnknownCode);
+socket.on('tooManyPlayers', handleTooManyPlayers);
 
 // handle the init message from the server
 function handleInit(init) {
-    // log the client's socket id
-    console.log(socket.id);
-
-    // log the data's message sent from the server
-    console.log(init.msg);
-
     // set the canvas size to the world size sent from the server
     canvas.width = init.worldSize.width;
     canvas.height = init.worldSize.height;
@@ -37,25 +81,23 @@ function handleInit(init) {
     // set the player equal to a tank object from the server
     player = init.player;
 
-    // send a message to the client acknowledging that they connected
-    socket.emit('join', 'Hello world from client');         
-    console.log("sent join message to server");  
+    // set the playerNumber to the socket id for the player
+    playerNumber = init.playerNumber;
 }
 
 // when the server sends an updated game state, handle the updates on the client side
 function handleGameState(gameState) {
+    // if the game is not being played then don't handle the game state
+    if (!gameActive) {
+        return;
+      }
+
     // parse the serialized game state object into a gameState object
     gameState = JSON.parse(gameState);
     
     // every time the server sends the client a new gameState the client will get a new animation frame and will be able to draw it to the client's canvas
     requestAnimationFrame(() => drawGame(gameState));
 }
-
-// mouse object for world interaction
-const mouse = {
-    x: null, 
-    y: null
-};
 
 // draw the state of the game on the clients screen
 function drawGame(gameState) {
@@ -143,7 +185,6 @@ function drawPlayer(player, drawCollisionBox) {
     ctx.closePath();
     ctx.restore();
     */
-
     
     // draw the top dome on the tank
     ctx.save();
@@ -285,7 +326,40 @@ function drawTerrain(terrain, worldSize) {
 
 // draw who won to the screen
 function handleGameOver(data) {
+    // if the game is not being played then return, but if it is and the gameOver message was sent from the server then set gameActive to false and show who won
+    if (!gameActive) {
+        return;
+    }
+    gameActive = false;
+
     ctx.font = "30px Arial";
     ctx.fillStyle = "Black";
     ctx.fillText(`Player ${data.playerWinner} won!`, canvas.width/2 - 50, canvas.height/2 - 50); 
+}
+
+// display the game code on the screen so that the second player could then get the code
+function handleGameCode(gameCode) {
+    gameCodeDisplay.innerText = gameCode;
+    console.log("The game code for the other player is: ", gameCode);
+}
+
+// if the server couldn't find a room with that game code
+function handleUnknownCode() {
+    reset();
+    alert('Unknown Game Code')
+}
+  
+// if the server deemed there to be too many players in a game
+function handleTooManyPlayers() {
+    reset();
+    alert('This game is already in progress');
+}
+  
+// reset all the values and take away the game screen and display the initial game code screen
+function reset() {
+    player = null;
+    playerNumber = null;
+    gameCodeInput.value = '';
+    initialScreen.style.display = "block";
+    gameScreen.style.display = "none";
 }

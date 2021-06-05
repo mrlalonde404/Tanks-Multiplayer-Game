@@ -2,7 +2,7 @@ const { WORLD_SIZE } = require("./constants.js");
 let Shell = require("./Shell.js");
 
 class Tank {
-    constructor(tx, ty, ba) {
+    constructor(tx, ty, ba, pid) {
         // the center of the position of the tank
         this._position = {
             x: tx,
@@ -31,7 +31,7 @@ class Tank {
         this._size = 20;
 
         // the players socket id
-        this.playerId = 0;
+        this._playerId = pid;
     }
 
     get position() {
@@ -66,6 +66,10 @@ class Tank {
         return this._size;
     }
 
+    get playerId() {
+        return this._playerId;
+    }
+
     set position(pos) {
         this._position = pos;
     }
@@ -96,6 +100,10 @@ class Tank {
 
     set size(s) {
         this._size = s;
+    }
+
+    set playerId(pid) {
+        this._playerId = pid;
     }
 
     fireShell(mass, shellSize) {

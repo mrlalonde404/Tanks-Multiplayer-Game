@@ -6,7 +6,7 @@ const splitScreen = false;
 
 let screenWidth = 1920;
 if (splitScreen) {
-    screenWidth = 960;
+    screenWidth = Math.floor(screenWidth/2);
 }
 
 // how big the world should be so that browser size doesn't determine how big everything is drawn
@@ -15,8 +15,11 @@ const WORLD_SIZE = {
     height: 1080
 };
 
+const NUM_TERRAIN_POINTS = 10;
+
 // export the constants so that they can be used in the world
 module.exports = {
     FRAME_RATE, 
-    WORLD_SIZE
+    WORLD_SIZE,
+    NUM_TERRAIN_POINTS
 };

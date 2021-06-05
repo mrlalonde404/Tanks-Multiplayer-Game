@@ -1,4 +1,5 @@
-const { WORLD_SIZE, FRAME_RATE } = require("./constants.js");
+const { WORLD_SIZE, NUM_TERRAIN_POINTS } = require("./constants.js");
+let Terrain = require("./Terrain.js");
 
 function createGameState(p1, p2, terrain, shells) {
     return {
@@ -80,7 +81,19 @@ function updateGame(state, delta) {
     return 0;
 }
 
+// make a new game with the world size, null players, a new terrain, and an empty list for the shells
+function initGame() {
+    return {
+        worldSize: WORLD_SIZE,
+        player1: null,
+        player2: null, 
+        terrain: new Terrain(NUM_TERRAIN_POINTS),
+        shells: []
+    };
+}
+
 module.exports = {
     createGameState,
     updateGame,
+    initGame
 };
