@@ -19,6 +19,9 @@ const mouse = {
 // make the client connection
 const socket = io.connect("http://localhost:3000");
 
+// local address of server to connect to from client
+//const socket = io.connect("http://192.168.1.164:3000");
+
 // parts of the screen needed
 const gameScreen = document.getElementById('gameScreen');
 const initialScreen = document.getElementById('initialScreen');
@@ -90,10 +93,17 @@ function handleGameState(gameState) {
     // if the game is not being played then don't handle the game state
     if (!gameActive) {
         return;
-      }
+    }
 
     // parse the serialized game state object into a gameState object
     gameState = JSON.parse(gameState);
+
+    // update the client's player object based on the player number
+    if (playerNumber === 1) {
+        player = gameState.player1;
+    } else if (playerNumber === 2) {
+        player = gameState.player2;
+    }
     
     // every time the server sends the client a new gameState the client will get a new animation frame and will be able to draw it to the client's canvas
     requestAnimationFrame(() => drawGame(gameState));
@@ -117,6 +127,9 @@ function drawGame(gameState) {
     // draw the players
     drawPlayer(gameState.player1, drawCollisionBox);
     drawPlayer(gameState.player2, drawCollisionBox);
+
+    // draw the values for tank values
+    drawPlayerValues(player);
 }
 
 // -- Event listeners
@@ -145,7 +158,6 @@ window.addEventListener('keydown', function(event) {
 
 function drawPlayer(player, drawCollisionBox) {
     // draw the barrel for the tank that tilts according to the barrelAngle
-    
     ctx.save();
     ctx.beginPath()
     ctx.fillStyle = "Gray";
@@ -261,6 +273,17 @@ function drawPlayer(player, drawCollisionBox) {
         ctx.fill();
         ctx.closePath();
     }
+}
+
+function drawPlayerValues(player) {
+    ctx.font = "30px Arial";
+    ctx.fillStyle = "Black";
+    // draw value for the angle of the barrel
+    ctx.fillText(`Angle: ${player._barrelAngle}`, canvas.width - 500, 25); 
+    // draw the power level
+    ctx.fillText(`Power: ${player._power}`, canvas.width - 325, 25); 
+    // draw the amount of fuel
+    ctx.fillText(`Fuel: ${player._fuel}`, canvas.width - 150, 25); 
 }
 
 // draw a shell

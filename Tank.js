@@ -25,7 +25,7 @@ class Tank {
         this._health = 100;
 
         // how many pixels the tank can move per turn
-        this._fuel = 500;
+        this._fuel = 100;
 
         // how big the tank is
         this._size = 20;

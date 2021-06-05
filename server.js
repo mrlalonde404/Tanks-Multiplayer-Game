@@ -66,8 +66,6 @@ function handleConnection(client) {
         console.log(`Client disconnected: ${client.id}`);
     });
 
-    
-
     // when a player clicks on the screen
     client.on('playerClick', function(data) {
         // get what room the client is in
@@ -94,29 +92,29 @@ function handleConnection(client) {
         }
     });
 
-        // when a player presses down on a key
-        client.on('playerKeyDown', function(data) {
-            // get what room the client is in
-            const roomName = clientRooms[client.id];
-            if (!roomName) {
-                return;
-            }
+    // when a player presses down on a key
+    client.on('playerKeyDown', function(data) {
+        // get what room the client is in
+        const roomName = clientRooms[client.id];
+        if (!roomName) {
+            return;
+        }
 
-            // get the player depending on the client number
-            let player;
-            if (client.number === 1) {
-                player = state[roomName].player1;
-            } else if (client.number === 2) {
-                player = state[roomName].player2;
-            }
-            // if the player is in the room and it is their turn, then let them move around, change angle and power, and shoot
-            // make sure the other players shell lands before the new player can move
-            if (client.id === state[roomName].turn && state[roomName].shells.length === 0) {
-                // log the client details and handle the key for the player based on the key data
-                console.log(`client ${client.id}: pressed key(${data.key})`);
-                handleKeyInput(player, data.key, state[roomName].shells);
-            }
-        });
+        // get the player depending on the client number
+        let player;
+        if (client.number === 1) {
+            player = state[roomName].player1;
+        } else if (client.number === 2) {
+            player = state[roomName].player2;
+        }
+        // if the player is in the room and it is their turn, then let them move around, change angle and power, and shoot
+        // make sure the other players shell lands before the new player can move
+        if (client.id === state[roomName].turn && state[roomName].shells.length === 0) {
+            // log the client details and handle the key for the player based on the key data
+            console.log(`client ${client.id}: pressed key(${data.key})`);
+            handleKeyInput(player, data.key, state[roomName].shells);
+        }
+    });
 
     // definition for newGame function
     function handleNewGame() {
