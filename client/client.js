@@ -70,7 +70,7 @@ socket.on('gameState', handleGameState);
 // when the server sends the game over state, tell the players who won
 socket.on('gameOver', handleGameOver);
 
-// handle the game code if it is valid, if it is unknown, or if there are too many players for that code
+// handle the game code: if it is valid, if it is unknown, or if there are too many players for that code
 socket.on('gameCode', handleGameCode);
 socket.on('unknownCode', handleUnknownCode);
 socket.on('tooManyPlayers', handleTooManyPlayers);
@@ -98,8 +98,8 @@ function handleGameState(gameState) {
     // stop displaying the code if it hasn't been stopped yet
     if (!removedCode) {
         gameCodeDisplay.style.display = "none";
-        canvas.style.top = "0";
-        canvas.style.left = "0";
+        canvas.style.top = 0;
+        canvas.style.left = 0;
         removedCode = true;
     }
     
@@ -303,7 +303,6 @@ function drawPlayerValues(gameState) {
     } else if (playerNumber === 2) {
         ctx.fillText(`Enemy Health: ${gameState.player1._health}`, canvas.width - 275, 25); 
     }
-
 }
 
 // draw a shell
@@ -392,7 +391,7 @@ function handleGameCode(code) {
     gameCodeDisplay.display = "block";
 
     // add the game code to the header game code discplay tag
-    gameCodeDisplay.innerText += code;
+    gameCodeDisplay.innerText = "Your game code is: " + code;
 }
 
 // if the server couldn't find a room with that game code
