@@ -123,9 +123,6 @@ function handleConnection(client) {
 
         // make a client room with the property of the first player's id and give it the value of the room game code
         clientRooms[client.id] = roomName;
-
-        // send the game code to the client
-        client.emit('gameCode', roomName);
         
         // make a new game in the state with the game code value as the roomName
         state[roomName] = initGame();
@@ -149,6 +146,9 @@ function handleConnection(client) {
         
         // add the first player to the state for this room
         state[roomName].player1 = player1;
+
+        // send the game code to the first player now that they have the world size
+        client.emit('gameCode', roomName);
     }
     
     // definition for joinGame function

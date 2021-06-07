@@ -1,14 +1,14 @@
 // get the canvas and context for drawing to the screen
 let canvas, ctx;
 
-// the player object for this client
-let player;
-
-// what number the player is
-let playerNumber;
+// the player object for this client, and what number the player is
+let player, playerNumber;
 
 // if the game is being played or not
 let gameActive = false;
+
+// if the game code has been removed from the screen
+let removedCode = false;
 
 // mouse object for world interaction
 const mouse = {
@@ -95,6 +95,14 @@ function handleGameState(gameState) {
         return;
     }
 
+    // stop displaying the code if it hasn't been stopped yet
+    if (!removedCode) {
+        gameCodeDisplay.style.display = "none";
+        canvas.style.top = "0";
+        canvas.style.left = "0";
+        removedCode = true;
+    }
+    
     // parse the serialized game state object into a gameState object
     gameState = JSON.parse(gameState);
 
@@ -379,9 +387,12 @@ function handleGameOver(data) {
 }
 
 // display the game code on the screen so that the second player could then get the code
-function handleGameCode(gameCode) {
-    gameCodeDisplay.innerText = gameCode;
-    console.log("The game code for the other player is: ", gameCode);
+function handleGameCode(code) {
+    // show the text
+    gameCodeDisplay.display = "block";
+
+    // add the game code to the header game code discplay tag
+    gameCodeDisplay.innerText += code;
 }
 
 // if the server couldn't find a room with that game code
